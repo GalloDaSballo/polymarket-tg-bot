@@ -40,6 +40,8 @@ const main = async () => {
 }
 
 
+setInterval(main, 10 * 60 * 1000) //every 10 mins
+
 
 
 
