@@ -62,4 +62,25 @@ GSN Recipient Balance ${gsnBalance}
                     text
                 }
             })
+
+            if(process.env.TG_ID_2){   
+                axios({
+                    method: 'POST',
+                    url: bot_url,
+                    data: {
+                        chat_id: process.env.TG_ID_2,
+                        text
+                    }
+                })
+            }
+            if(process.env.TG_ID_3){
+                axios({
+                    method: 'POST',
+                    url: bot_url,
+                    data: {
+                        chat_id: process.env.TG_ID_3,
+                        text
+                    }
+                })
+            }
 }
