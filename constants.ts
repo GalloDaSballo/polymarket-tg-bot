@@ -6,7 +6,7 @@ export const RELAY_HUB_ABI = [
   "function balanceOf(address target) external view returns (uint256)",
 ];
 
-export const POLYMARKET_RELAYER_ADDRES =
+export const POLYMARKET_MAINNET_ADDRES =
   "0x64ff2d76fe3095fb9f0a18c088b345ffd2bf8e85";
 
 export const OUR_RECIPIENT_ADD = "0xaB45c5A4B0c941a2F231C04C3f49182e1A254052"; //Address of our GSN recipient
@@ -16,3 +16,12 @@ export const MAINNET_URL =
 
 export const POLYMARKET_MAINNET_URL =
   "https://mainnet-gsn.polymarket.io/getaddr";
+
+export const MATIC_URLS = [
+  "https://matic-gsn.polymarket.io/getaddr",
+  "https://matic-gsn2.polymarket.io/getaddr",
+  "https://matic-gsn3.polymarket.io/getaddr",
+];
+
+export const POLYMARKET_MATIC_URL =
+  "https://rpc-mainnet.maticvigil.com/v1/10b14f0a4554047ec93e2b109f00c1428dde00f2";

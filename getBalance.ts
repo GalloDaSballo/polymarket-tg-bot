@@ -1,44 +1,78 @@
 import dotenv from "dotenv";
 import { ethers } from "ethers";
-import { MAINNET_URL } from "./constants";
 import {
-  getMainnetRecipientBalance,
-  getMainnetRelayerBalance,
-  isMainnetRelayerReady,
-} from "./helpers/mainnet";
+  MAINNET_URL,
+  POLYMARKET_MAINNET_URL,
+  MATIC_URLS,
+  POLYMARKET_MAINNET_ADDRES,
+  POLYMARKET_MATIC_URL,
+} from "./constants";
 import {
-  isBelowMinimum,
-  isMoreThanAnHourAgo,
-  displayNotification,
-} from "./helpers/util";
-import { sendMessage } from "./helpers/telegram";
-
+  getRecipientBalance,
+  getRelayerBalance,
+  getRelayerData,
+} from "./helpers/ethers";
 dotenv.config();
 
-let lastTime = new Date();
-
 const main = async (): Promise<void> => {
-  const provider = new ethers.providers.JsonRpcProvider(MAINNET_URL);
+  const mainnetProvider = new ethers.providers.JsonRpcProvider(MAINNET_URL);
+  const maticProvider = new ethers.providers.JsonRpcProvider(
+    POLYMARKET_MATIC_URL
+  );
 
-  const mainnetRecipientBalance = await getMainnetRecipientBalance(provider);
-  console.log("mainnetRecipientBalance", mainnetRecipientBalance);
+  const mainnetRecipientBalance = await getRecipientBalance(mainnetProvider);
 
-  const gsnBalance = await getMainnetRelayerBalance(provider);
-  console.log("formattedGSNBalance", gsnBalance);
+  const gsnBalance = await getRelayerBalance(
+    mainnetProvider,
+    POLYMARKET_MAINNET_ADDRES
+  );
+  const relayer = await getRelayerData(POLYMARKET_MAINNET_URL);
 
-  const isRelayerReady = await isMainnetRelayerReady();
-  console.log("isRelayerReady", isRelayerReady);
+  const mainnetData = {
+    recipientBalance: mainnetRecipientBalance,
+    address: MAINNET_URL,
+    relayers: [
+      {
+        balance: gsnBalance,
+        isReady: relayer.isReady,
+        address: POLYMARKET_MAINNET_ADDRES,
+      },
+    ],
+  };
 
-  if (
-    isMoreThanAnHourAgo(lastTime) &&
-    isBelowMinimum(mainnetRecipientBalance, gsnBalance)
-  ) {
-    //An hour has passed and we're still running low
-    displayNotification(mainnetRecipientBalance, gsnBalance);
-    // sendMessage(mainnetRecipientBalance, gsnBalance);
-    lastTime = new Date();
+  const relayers = [];
+  const maticRecipientBalance = await getRecipientBalance(maticProvider);
+
+  const maticData: any = {
+    recipientBalance: maticRecipientBalance,
+    address: POLYMARKET_MATIC_URL,
+    relayers: [],
+  };
+
+  for (let url of MATIC_URLS) {
+    const relayer = await getRelayerData(url);
+    relayers.push(relayer);
   }
+
+  for (let i = 0; i < relayers.length; i++) {
+    const gsnBalance = await getRelayerBalance(
+      maticProvider,
+      relayers[i].address
+    );
+
+    const relayerData: any = {
+      balance: gsnBalance,
+      isReady: relayers[i].isReady,
+      address: relayers[i].address,
+    };
+
+    maticData.relayers.push(relayerData);
+  }
+
+  // output
+  const data = { mainnet: mainnetData, matic: maticData };
+  console.log(data.mainnet);
+  console.log(data.matic);
 };
 
-main(); // REMOVE THIS
 setInterval(main, 10 * 60 * 1000); //every 10 mins

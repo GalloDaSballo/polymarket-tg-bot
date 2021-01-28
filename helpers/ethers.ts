@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import {
-  POLYMARKET_RELAYER_ADDRES,
   RELAY_HUB_ABI,
   RELAY_HUB_ADD,
   OUR_RECIPIENT_ADD,
@@ -10,24 +9,25 @@ import {
 import axios from "axios";
 
 /**
- * Gets and formats mainnet relayer balance
+ * Gets and formats relayer balance
  * @param provider
- * @returns mainnet relayer balance
+ * @returns  relayer balance
  */
-export const getMainnetRelayerBalance = async (
-  provider: ethers.providers.JsonRpcProvider
+export const getRelayerBalance = async (
+  provider: ethers.providers.JsonRpcProvider,
+  address: string
 ): Promise<string> => {
-  const relayerBalance = await provider.getBalance(POLYMARKET_RELAYER_ADDRES);
+  const relayerBalance = await provider.getBalance(address);
 
   return ethers.utils.formatEther(relayerBalance);
 };
 
 /**
- * Gets and formats mainnet relayer recipient balance
+ * Gets and formats relayer recipient balance
  * @param provider
  * @returns GSNBalance
  */
-export const getMainnetRecipientBalance = async (
+export const getRecipientBalance = async (
   provider: ethers.providers.JsonRpcProvider
 ): Promise<string> => {
   const relayHubContract = new ethers.Contract(
@@ -41,19 +41,29 @@ export const getMainnetRecipientBalance = async (
   return ethers.utils.formatEther(GSNBalance);
 };
 
+type Relayer = {
+  isReady: boolean;
+  address: string;
+};
+
 /**
- * Checks if the mainnet relayer is ready
- * @returns boolean
+ * Fetches the relayer
+ * @returns Relayer
  */
-export const isMainnetRelayerReady = async (): Promise<boolean> => {
+export const getRelayerData = async (url: string): Promise<Relayer> => {
   try {
     const res = await axios({
       method: "GET",
-      url: POLYMARKET_MAINNET_URL,
+      url,
     });
 
-    return res.data?.Ready === true;
+    const relayer = {
+      address: res.data?.RelayServerAddress,
+      isReady: res.data?.Ready,
+    };
+
+    return relayer;
   } catch (err) {
-    throw new Error("Error fetching relayer status" + err);
+    throw new Error("Error fetching relayer data" + err);
   }
 };
