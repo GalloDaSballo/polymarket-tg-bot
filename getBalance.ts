@@ -14,7 +14,7 @@ import {
 } from "./helpers/ethers";
 dotenv.config();
 
-const main = async (): Promise<void> => {
+const getBalance = async (): Promise<any> => {
   const mainnetProvider = new ethers.providers.JsonRpcProvider(MAINNET_URL);
   const maticProvider = new ethers.providers.JsonRpcProvider(
     POLYMARKET_MATIC_URL
@@ -71,8 +71,8 @@ const main = async (): Promise<void> => {
 
   // output
   const data = { mainnet: mainnetData, matic: maticData };
-  console.log(data.mainnet);
-  console.log(data.matic);
+
+  return data
 };
 
-setInterval(main, 10 * 60 * 1000); //every 10 mins
+export default getBalance;
